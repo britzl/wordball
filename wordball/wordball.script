@@ -1,0 +1,110 @@
+local flow = require "ludobits.m.flow"
+local words = require "wordball.words"
+
+
+local function post_to_ui(message_id, message)
+	msg.post("ui#wordball", message_id, message)
+end
+
+local function feedback(text)
+	print("feedback", text)
+	label.set_text("feedback#label", text)
+	go.set_position(vmath.vector3(320, -200, 0), "feedback")
+	go.animate("feedback", "position.y", go.PLAYBACK_ONCE_FORWARD, 568, go.EASING_OUTQUAD, 1, 0, function()
+		go.set_position(vmath.vector3(320, -200, 0), "feedback")
+	end)
+end
+
+
+local function highlight_ball(self, id, enable)
+	msg.post(msg.url(nil, id, "highlight"), enable and "enable" or "disable")
+end
+
+
+local function spawn_ball(self, letter)
+	local id = factory.create("factories#ball", vmath.vector3(math.random(40,600), 1300, 0), nil, {}, 0.6)
+	letter = letter or words.random_letter()
+	value = words.value(letter)
+	label.set_text(msg.url(nil, id, "letter"), letter)
+	label.set_text(msg.url(nil, id, "value"), value)
+	highlight_ball(self, id, false)
+	self.letters[id] = letter
+	--print(self.letters[id])
+end
+
+local function update_score(self)
+	post_to_ui("update_score", { score = self.score, max = 100 })
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.1, 0.1, 0.1, 1.0) })
+	words.load("en")
+	math.randomseed(os.time())
+	self.letters = {}
+	self.score = 0
+	update_score(self)
+	flow(function()
+		for i=1,10 do
+			spawn_ball(self)
+			flow.delay(0.1)
+		end
+		while true do
+			spawn_ball(self)
+			flow.delay(2)
+		end
+	end)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	flow.update(dt)
+end
+
+function on_message(self, message_id, message, sender)
+	flow.on_message(message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if not message.enter then
+			highlight_ball(self, message.other_id, false)
+		end
+		if message.enter then
+			self.over_letter = message.other_id
+			highlight_ball(self, self.over_letter, true)
+		elseif self.over_letter == message.other_id then
+			self.over_letter = nil
+		end
+	elseif message_id == hash("add_letters") then
+		for i=1,#message.letters do
+			spawn_ball(self, message.letters:sub(i,i))
+		end
+	elseif message_id == hash("wrong_word") then
+		feedback("WRONG!")
+	elseif message_id == hash("correct_word") then
+		local value = message.value
+		feedback("CORRECT!\n+" .. tostring(value) .. " pts")
+		self.score = self.score + value
+		update_score(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	go.set_position(vmath.vector3(action.x, action.y, 0))
+	if action_id == hash("touch") and action.released then
+		if self.over_letter then
+			local l = self.letters[self.over_letter]
+			self.letters[self.over_letter] = nil
+			go.delete(self.over_letter)
+			self.over_letter = nil
+			post_to_ui("add_letter", { letter = l })
+		end
+	end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Remove this function if not needed
+end

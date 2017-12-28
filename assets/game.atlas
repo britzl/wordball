@@ -1,0 +1,39 @@
+images {
+  image: "/assets/images/bar slot.png"
+}
+images {
+  image: "/assets/images/bar.png"
+}
+images {
+  image: "/assets/images/circle ok.png"
+}
+images {
+  image: "/assets/images/letter bg.png"
+}
+images {
+  image: "/assets/images/letter glass.png"
+}
+images {
+  image: "/assets/images/letter gradient.png"
+}
+images {
+  image: "/assets/images/menu.png"
+}
+images {
+  image: "/assets/images/red glow.png"
+}
+images {
+  image: "/assets/images/ui bottom.png"
+}
+images {
+  image: "/assets/images/ui top.png"
+}
+images {
+  image: "/assets/images/circle cancel.png"
+}
+images {
+  image: "/assets/images/ui bottom 2.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

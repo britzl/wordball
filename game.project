@@ -1,0 +1,47 @@
+[project]
+title = Wordball
+version = 1.0
+dependencies = https://github.com/britzl/gooey/archive/1.1.zip,https://github.com/britzl/monarch/archive/1.0.zip,https://github.com/britzl/ludobits/archive/1.3.4.zip,https://github.com/britzl/defold-sharing/archive/1.1.1.zip
+custom_resources = 
+
+[bootstrap]
+main_collection = /wordball/wordball.collectionc
+
+[input]
+game_binding = /input/game.input_bindingc
+use_accelerometer = 0
+
+[display]
+width = 640
+height = 1136
+high_dpi = 1
+
+[physics]
+scale = 0.05
+gravity_y = -1000.0
+debug = 0
+max_collisions = 500
+max_contacts = 2000
+
+[script]
+shared_state = 1
+
+[library]
+include_dirs = 
+
+[android]
+package = com.britzl.wordball
+manifest = /AndroidManifest.xml
+
+[ios]
+bundle_identifier = com.britzl.wordball
+
+[osx]
+bundle_identifier = com.britzl.wordball
+
+[sprite]
+max_count = 1000
+
+[label]
+max_count = 1000
+
