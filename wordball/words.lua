@@ -31,7 +31,8 @@ function M.load(lang)
 		frequencies[letter] = frequencies[letter] + 1
 	end
 	for letter,frequency in pairs(frequencies) do
-		values[letter] = math.ceil(10 * (1 / math.sqrt(frequency)))
+		local value = math.ceil(10 / math.sqrt(frequency))
+		values[letter] = value + value
 	end
 end
 

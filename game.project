@@ -1,7 +1,7 @@
 [project]
 title = Wordball
 version = 1.0
-dependencies = https://github.com/britzl/gooey/archive/1.1.zip,https://github.com/britzl/monarch/archive/1.0.zip,https://github.com/britzl/ludobits/archive/1.3.4.zip
+dependencies = https://github.com/britzl/gooey/archive/1.1.zip,https://github.com/britzl/monarch/archive/1.0.zip,https://github.com/britzl/ludobits/archive/5.0.zip,https://github.com/britzl/defold-input/archive/0.11.1.zip
 custom_resources = assets/dictionaries
 
 [bootstrap]
