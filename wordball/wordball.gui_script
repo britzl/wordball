@@ -23,12 +23,17 @@ end
 function on_message(self, message_id, message, sender)
 	--print(message_id)
 	if message_id == hash("word") then
+		self.value = 0
 		self.word = ""
-		for _,l in pairs(message) do
+		for _,l in pairs(message.letters) do
 			self.word = self.word .. l.letter
+			self.value = self.value + l.value
 		end
-		self.value = words.value(self.word)
-		gui.set_text(self.letters_node, ("%s (%d pts)"):format(self.word, self.value))
+		if self.word ~= "" then
+			gui.set_text(self.letters_node, ("%s (%d pts)"):format(self.word, self.value))
+		else
+			gui.set_text(self.letters_node, "")
+		end
 	elseif message_id == hash("update_score") then
 		local node = gui.get_node("scorebar")
 		local ratio = math.min(1, message.score / message.max)
