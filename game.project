@@ -1,7 +1,7 @@
 [project]
 title = Wordball
 version = 1.0
-dependencies = https://github.com/britzl/gooey/archive/1.1.zip,https://github.com/britzl/monarch/archive/1.0.zip,https://github.com/britzl/ludobits/archive/5.0.zip,https://github.com/britzl/defold-input/archive/1.0.0.zip,https://github.com/britzl/defold-orthographic/archive/2.2.zip
+dependencies = https://github.com/britzl/defold-input/archive/1.4.0.zip,https://github.com/britzl/defold-orthographic/archive/2.6.0.zip
 custom_resources = assets/dictionaries
 
 [bootstrap]
@@ -32,7 +32,7 @@ include_dirs =
 
 [android]
 package = com.britzl.wordball
-manifest = 
+manifest = /builtins/manifests/android/AndroidManifest.xml
 
 [ios]
 bundle_identifier = com.britzl.wordball
@@ -45,4 +45,8 @@ max_count = 1000
 
 [label]
 max_count = 1000
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
 

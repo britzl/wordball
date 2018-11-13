@@ -1,36 +1,18 @@
-local words = require "wordball.words"
+local function post_to_game(message_id, message)
+	msg.post("game#wordball", message_id, message or {})
+end
 
 function init(self)
-	self.word = ""
-	self.value = 0
-	self.letters = {}
 	self.letters_node = gui.get_node("letters")
 	self.confirm_node = gui.get_node("confirm")
 	self.cancel_node = gui.get_node("cancel")
 	msg.post(".", "acquire_input_focus")
 end
 
-function final(self)
-	-- Add finalization code here
-	-- Remove this function if not needed
-end
-
-function update(self, dt)
-	-- Add update code here
-	-- Remove this function if not needed
-end
-
 function on_message(self, message_id, message, sender)
-	--print(message_id)
 	if message_id == hash("word") then
-		self.value = 0
-		self.word = ""
-		for _,l in pairs(message.letters) do
-			self.word = self.word .. l.letter
-			self.value = self.value + l.value
-		end
-		if self.word ~= "" then
-			gui.set_text(self.letters_node, ("%s (%d pts)"):format(self.word, self.value))
+		if message.word ~= "" then
+			gui.set_text(self.letters_node, ("%s (%d pts)"):format(message.word, message.score))
 		else
 			gui.set_text(self.letters_node, "")
 		end
@@ -38,32 +20,19 @@ function on_message(self, message_id, message, sender)
 		local node = gui.get_node("scorebar")
 		local ratio = math.min(1, message.score / message.max)
 		local size = gui.get_size(node)
-		size.x = 30 + 820 * ratio
+		size.x = 8 + 600 * ratio
 		gui.set_size(node, size)
 	end
 end
 
 function on_input(self, action_id, action)
 	if action_id == hash("touch") and action.released then
-		if gui.pick_node(self.cancel_node, action.x, action.y) and #self.word > 0 then
-			--msg.post("game#wordball", "add_letters", { letters = self.word })
-			msg.post("game#wordball", "cancel_word")
-			self.word = ""
-			self.value = 0
+		if gui.pick_node(self.cancel_node, action.x, action.y) then
+			post_to_game("cancel_word")
 			gui.set_text(self.letters_node, "")
 		elseif gui.pick_node(self.confirm_node, action.x, action.y) then
-			if words.is_word(self.word) then
-				print("correct")
-				msg.post("game#wordball", "correct_word", { value = self.value })
-			else
-				print("incorrect")
-				--msg.post("game#wordball", "add_letters", { letters = self.word })
-				msg.post("game#wordball", "wrong_word")
-			end
-			self.word = ""
-			self.value = 0
+			post_to_game("confirm_word")
 			gui.set_text(self.letters_node, "")
-			
 		end
 	end
 end

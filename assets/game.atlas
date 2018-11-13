@@ -1,38 +1,44 @@
 images {
-  image: "/assets/images/bar slot.png"
+  image: "/assets/images/hp panel.png"
 }
 images {
-  image: "/assets/images/bar.png"
+  image: "/assets/images/hp texture.png"
 }
 images {
-  image: "/assets/images/circle ok.png"
+  image: "/assets/images/v button.png"
 }
 images {
-  image: "/assets/images/letter bg.png"
+  image: "/assets/images/x button.png"
 }
 images {
-  image: "/assets/images/letter glass.png"
+  image: "/assets/images/small panel 2.png"
 }
 images {
-  image: "/assets/images/letter gradient.png"
+  image: "/assets/images/hp-mana bar.png"
 }
 images {
-  image: "/assets/images/menu.png"
+  image: "/assets/images/round_wood.png"
 }
 images {
-  image: "/assets/images/red glow.png"
+  image: "/assets/images/round_metal.png"
 }
 images {
-  image: "/assets/images/ui bottom.png"
+  image: "/assets/images/round_metalDark.png"
 }
 images {
-  image: "/assets/images/ui top.png"
+  image: "/assets/images/round_metalGreen.png"
 }
 images {
-  image: "/assets/images/circle cancel.png"
+  image: "/assets/images/round_metalRed.png"
 }
 images {
-  image: "/assets/images/ui bottom 2.png"
+  image: "/assets/images/round_woodPaper.png"
+}
+images {
+  image: "/assets/images/round_woodWear.png"
+}
+images {
+  image: "/assets/images/round_woodPaperWear.png"
 }
 margin: 0
 extrude_borders: 2

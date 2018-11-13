@@ -1,16 +1,19 @@
-local flow = require "ludobits.m.flow"
 local words = require "wordball.words"
 local camera = require "orthographic.camera"
 
-local SELECTED = vmath.vector4(1, 1, 1, 4)
-local BONUS = vmath.vector4(1.5, 0.5, 0, 2.5)
+local HIGHLIGHT = vmath.vector4(1.1, 1.1, 1.1, 0)
+local SELECTED = vmath.vector4(1.6, 1.6, 1.6, 0)
+local BONUS = vmath.vector4(0, 2, 0, 0.5)
 local NORMAL = vmath.vector4(1)
 local LOCKED = vmath.vector4(0.4, 0.4, 0.4, 1)
 
+-- send a message to the gui
 local function post_to_ui(message_id, message)
 	msg.post("ui#wordball", message_id, message)
 end
 
+-- tint a letter
+-- the letter can have a base tint and then an additional tint (for highlight)
 local function tint_letter(letter, tint)
 	tint = tint or vmath.vector4(0)
 	local tint_mul = vmath.vector4(letter.tint.x + tint.x, letter.tint.y + tint.y, letter.tint.z + tint.z, letter.tint.w + tint.w)
@@ -18,10 +21,10 @@ local function tint_letter(letter, tint)
 end
 
 local function one_in_x(chance)
-	assert(chance and type(chance) == "number" and chance >= 1)
 	return math.random(1, chance) == chance
 end
 
+-- create a floating feedback text
 local function feedback(text)
 	print("feedback", text)
 	label.set_text("feedback#label", text)
@@ -31,14 +34,11 @@ local function feedback(text)
 	end)
 end
 
-local function highlight_ball(self, id, enable)
-	msg.post(msg.url(nil, id, "highlight"), enable and "enable" or "disable")
-end
-
+-- spawn a new ball
 local function spawn_ball(self, letter)
 	local bonus = one_in_x(10)
 	local tint = bonus and BONUS or NORMAL
-	local id = factory.create("factories#ball", vmath.vector3(math.random(40,600), 1300, 0), nil, {}, 0.6)
+	local id = factory.create("factories#ball", vmath.vector3(math.random(40,600), 1300, 0), nil, {}, 0.75)
 	letter = letter or words.random_letter()
 	value = words.value(letter)
 	if bonus then
@@ -46,30 +46,49 @@ local function spawn_ball(self, letter)
 	end
 	label.set_text(msg.url(nil, id, "letter"), letter)
 	label.set_text(msg.url(nil, id, "value"), value)
-	highlight_ball(self, id, false)
 	self.letters[id] = { letter = letter, selected = false, id = id, tint = tint, bonus = bonus, value = value }
 	tint_letter(self.letters[id])
 end
 
+-- get the word and score for a list of letters
+-- iterate the letters to concatenate the characters
+-- and calculate the score
+-- note: this does not check if the word is valid or not
+local function word_and_score_from_letters(letters)
+	local word = ""
+	local value = 0
+	for _,letter in pairs(letters) do
+		word = word .. letter.letter
+		value = value + letter.value
+	end
+	return word, value
+end
+
+-- add a letter to the word that is currently being created
+-- returns the current word and score
 local function add_letter_to_word(self, letter_to_add)
 	letter_to_add.selected = true
 	tint_letter(letter_to_add, SELECTED)
-	--go.set(msg.url(nil, letter_to_add.id, "bg"), "tint.w", 4)
 	table.insert(self.word, letter_to_add)
+	return word_and_score_from_letters(self.word)
 end
 
+-- remove a letter from the word that is currently being created
+-- returns the current word and score
 local function remove_letter_from_word(self, letter_to_remove)
 	for i,letter in ipairs(self.word) do
 		if letter.id == letter_to_remove.id then
 			tint_letter(letter_to_remove)
-			--go.set(msg.url(nil, letter_to_remove.id, "bg"), "tint.w", 1)
 			letter_to_remove.selected = false
 			table.remove(self.word, i)
 			break
 		end
 	end
+	return word_and_score_from_letters(self.word)
 end
 
+-- delete all letters in the current word
+-- this will delete the associated game objects
 local function delete_word(self)
 	for k,letter in pairs(self.word) do
 		self.word[k] = nil
@@ -77,12 +96,16 @@ local function delete_word(self)
 	end
 end
 
-local function reset_word(self)
+-- cancel creation of the current word
+-- this will remove the individual letters from the word
+local function cancel_word(self)
 	while #self.word > 0 do
 		remove_letter_from_word(self, self.word[1])
 	end
 end
 
+--- reset the letters of the current word and lock them
+-- so that they can't be interacted with
 local function reset_and_lock_word(self)
 	while #self.word > 0 do
 		local letter = self.word[1]
@@ -99,65 +122,75 @@ local function update_score(self)
 	post_to_ui("update_score", { score = self.score, max = 100 })
 end
 
+local function delay(duration)
+	local co = coroutine.running()
+	assert(co, "You must run this from a coroutine")
+	timer.delay(duration, false, function()
+		local ok, err = coroutine.resume(co)
+		if not ok then print(err) end
+	end)
+	coroutine.yield()
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	msg.post("@render:", "clear_color", { color = vmath.vector4(0.1, 0.1, 0.1, 1.0) })
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.125, 0.1, 0.1, 1.0) })
 	words.load("en")
 	math.randomseed(os.time())
 	self.letters = {}
 	self.word = {}
 	self.score = 0
 	update_score(self)
-	flow(function()
+
+	-- game loop
+	coroutine.wrap(function()
 		for i=1,10 do
 			spawn_ball(self)
-			flow.delay(0.1)
+			delay(0.1)
 		end
 		while true do
 			spawn_ball(self)
-			flow.delay(2)
+			delay(2)
 		end
-	end)
-end
-
-function final(self)
-	-- Add finalization code here
-	-- Remove this function if not needed
-end
-
-function update(self, dt)
-	flow.update(dt)
+	end)()
 end
 
 function on_message(self, message_id, message, sender)
-	flow.on_message(message_id, message, sender)
+	-- cursor is over a letter, highlight it
 	if message_id == hash("cursor_over") then
-		highlight_ball(self, message.id, true)
+		local letter = self.letters[message.id]
+		tint_letter(letter, HIGHLIGHT)
+	-- cursor moved out from letter, remove highlight
 	elseif message_id == hash("cursor_out") then
-		highlight_ball(self, message.id, false)
-	elseif message_id == hash("released") then
-		local l = self.letters[message.id]
-		if not l.selected then
-			add_letter_to_word(self,l)
+		local letter = self.letters[message.id]
+		if letter.selected then
+			tint_letter(letter, SELECTED)
 		else
-			remove_letter_from_word(self, l)
+			tint_letter(letter, vmath.vector4(0))
 		end
-		post_to_ui("word", { letters = self.word } )
-	elseif message_id == hash("add_letters") then
-		for i=1,#message.letters do
-			spawn_ball(self, message.letters:sub(i,i))
+	-- letter has been clicked (pressed+released cycle)
+	elseif message_id == hash("released") then
+		local letter = self.letters[message.id]
+		if not letter.selected then
+			local word, score = add_letter_to_word(self, letter)
+			post_to_ui("word", { word = word, score = score } )
+		else
+			local word, score = remove_letter_from_word(self, letter)
+			post_to_ui("word", { word = word, score = score } )
 		end
 	elseif message_id == hash("cancel_word") then
-		reset_word(self)
-	elseif message_id == hash("wrong_word") then
-		feedback("WRONG!")
-		reset_and_lock_word(self)
-	elseif message_id == hash("correct_word") then
-		local value = message.value
-		feedback("CORRECT!\n+" .. tostring(value) .. " pts")
-		self.score = self.score + value
-		update_score(self)
-		delete_word(self)
+		cancel_word(self)
+	elseif message_id == hash("confirm_word") then
+		local word, score = word_and_score_from_letters(self.word)
+		if words.is_word(word) then
+			feedback("CORRECT!\n+" .. tostring(value) .. " pts")
+			self.score = self.score + score
+			update_score(self)
+			delete_word(self)
+		else
+			feedback("WRONG!")
+			reset_and_lock_word(self)
+		end
 	end
 end
 

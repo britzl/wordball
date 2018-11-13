@@ -1,4 +1,4 @@
-name: "default"
+name: "wordball"
 instances {
   id: "camera"
   prototype: "/orthographic/camera.go"
@@ -12,19 +12,6 @@ instances {
     y: 0.0
     z: 0.0
     w: 1.0
-  }
-  component_properties {
-    id: "script"
-    properties {
-      id: "zoom"
-      value: "1.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "projection"
-      value: "FIXED_AUTO"
-      type: PROPERTY_TYPE_HASH
-    }
   }
   scale3 {
     x: 1.0

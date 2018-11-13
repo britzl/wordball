@@ -1,2 +1,6 @@
-# wordball
-ProcJam 2017
+# Wordball
+Originally made for ProcJam 2017 but never released.
+
+## Credits
+* UI - [Pocket GUI](https://plastic-vibes.itch.io/pocket-gui-for-pixel-mobile-games)
+* Balls - [kenney](http://www.kenney.nl)
