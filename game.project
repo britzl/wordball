@@ -1,7 +1,7 @@
 [project]
 title = Wordball
 version = 1.0
-dependencies = https://github.com/britzl/defold-input/archive/1.4.0.zip,https://github.com/britzl/defold-orthographic/archive/2.6.0.zip
+dependencies = https://github.com/britzl/defold-input/archive/1.4.1.zip,https://github.com/britzl/defold-orthographic/archive/2.6.0.zip,https://github.com/britzl/defold-indexhtml/archive/master.zip
 custom_resources = assets/dictionaries
 
 [bootstrap]
@@ -49,4 +49,7 @@ max_count = 1000
 [graphics]
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
+
+[html5]
+htmlfile = /index.html
 
